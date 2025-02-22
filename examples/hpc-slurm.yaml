@@ -73,6 +73,7 @@ deployment_groups:
     use: [network]
     settings:
       machine_type: n2-standard-2
+      enable_shielded_vm: true
       enable_login_public_ips: false
 
   - id: slurm_controller
@@ -84,3 +85,4 @@ deployment_groups:
     - slurm_login
     settings:
       enable_controller_public_ips: false
+      enable_shielded_vm: true
