@@ -17,10 +17,10 @@
 blueprint_name: hpc-slurm
 
 vars:
-  project_id:  ## Set GCP Project ID Here ##
+  project_id:  argo-hn-genomics-on-slurm
   deployment_name: hpc-slurm
-  region: us-central1
-  zone: us-central1-a
+  region: europe-west2
+  zone: europe-west2-a
 
 # Documentation for each of the modules used below can be found at
 # https://github.com/GoogleCloudPlatform/hpc-toolkit/blob/main/modules/README.md
@@ -49,30 +49,17 @@ deployment_groups:
     settings:
       local_mount: /home
 
-  - id: debug_nodeset
-    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
-    use: [network]
-    settings:
-      node_count_dynamic_max: 4
-      machine_type: n2-standard-2
-      allow_automatic_updates: false
-
-  - id: debug_partition
-    source: community/modules/compute/schedmd-slurm-gcp-v6-partition
-    use:
-    - debug_nodeset
-    settings:
-      partition_name: debug
-      exclusive: false # allows nodes to stay up after jobs are done
-      is_default: true
-
   - id: compute_nodeset
     source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
     use: [network]
     settings:
       node_count_dynamic_max: 20
+      machine_type: n2-standard-8
       bandwidth_tier: gvnic_enabled
       allow_automatic_updates: false
+      disk_type: pd-balanced
+      enable_shielded_vm: true
+      enable_login_public_ips: false
 
   - id: compute_partition
     source: community/modules/compute/schedmd-slurm-gcp-v6-partition
@@ -81,41 +68,19 @@ deployment_groups:
     settings:
       partition_name: compute
 
-  - id: h3_nodeset
-    source: community/modules/compute/schedmd-slurm-gcp-v6-nodeset
-    use: [network]
-    settings:
-      node_count_dynamic_max: 20
-      # Note that H3 is available in only specific zones. https://cloud.google.com/compute/docs/regions-zones
-      machine_type: h3-standard-88
-      # H3 does not support pd-ssd and pd-standard
-      # https://cloud.google.com/compute/docs/compute-optimized-machines#h3_disks
-      disk_type: pd-balanced
-      bandwidth_tier: gvnic_enabled
-      allow_automatic_updates: false
-
-  - id: h3_partition
-    source: community/modules/compute/schedmd-slurm-gcp-v6-partition
-    use:
-    - h3_nodeset
-    settings:
-      partition_name: h3
-
   - id: slurm_login
     source: community/modules/scheduler/schedmd-slurm-gcp-v6-login
     use: [network]
     settings:
-      machine_type: n2-standard-4
-      enable_login_public_ips: true
+      machine_type: n2-standard-2
+      enable_login_public_ips: false
 
   - id: slurm_controller
     source: community/modules/scheduler/schedmd-slurm-gcp-v6-controller
     use:
     - network
-    - debug_partition
     - compute_partition
-    - h3_partition
     - homefs
     - slurm_login
     settings:
-      enable_controller_public_ips: true
+      enable_controller_public_ips: false
