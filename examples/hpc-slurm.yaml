@@ -59,7 +59,7 @@ deployment_groups:
       allow_automatic_updates: false
       disk_type: pd-balanced
       enable_shielded_vm: true
-      enable_login_public_ips: false
+      enable_public_ips: false
 
   - id: compute_partition
     source: community/modules/compute/schedmd-slurm-gcp-v6-partition
